@@ -10,6 +10,7 @@ cmdAdd = { "add", "new" }
 cmdRemove = { "del", "delete", "rm", "remove" }
 cmdClear = { "clear", "empty" }
 cmdDelete = { "delete-list", "deletelist" }
+cmdCopy = { "copy", "clone", "cp" }
 cmdRename = { "move", "rename", "mv" }
 cmdPick = { "echo", "pick", "get" }
 cmdExecute = { "execute", "exec", "call", "run", "do" }
@@ -190,6 +191,28 @@ local function DeleteList(args)
 		Game.PrintMessage(string.format("Deleted list [%s]", target))
 	end
 end
+local function CopyList(args)
+	local source, dest
+	source, args = shiftWord(args)
+	dest = shiftWord(args)
+	if type(Script.Storage.lists[source]) ~= "table" then
+		Game.PrintError(string.format("Cannot rename non-existent list [%s]", source))
+		return
+	end
+	if type(Script.Storage.lists[dest]) == "table" then
+		Game.PrintError(string.format("Cannot overwrite existing list [%s]", dest))
+		return
+	end
+	local origin = Script.Storage.lists[source]
+	local clone = {}
+	for i,v in ipairs(origin) do
+		clone[i] = v
+	end
+	Script.Storage.lists[dest] = clone
+	if Script.SaveStorage() and not Script.Storage.config.SuppressStatusMessages then
+		Game.PrintMessage(string.format("Copied list [%s] into new slot [%s]", source, dest))
+	end
+end
 local function RenameList(args)
 	local source, dest
 	source, args = shiftWord(args)
@@ -337,6 +360,8 @@ local function core(textline)
 		ClearList(args)
 	elseif contains(cmdDelete, action) then
 		DeleteList(args)
+	elseif contains(cmdCopy, action) then
+		CopyList(args)
 	elseif contains(cmdRename, action) then
 		RenameList(args)
 	elseif contains(cmdPick, action) then
