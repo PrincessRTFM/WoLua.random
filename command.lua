@@ -1,4 +1,4 @@
-Script.Debug.Enabled = true
+--Script.Debug.Enabled = true
 
 local pick = require 'pick'
 local contains = require 'contains'
@@ -28,7 +28,7 @@ Script.Storage.config.SuppressStatusMessages = Script.Storage.config.SuppressSta
 Script.Storage.config.VerboseSelection = Script.Storage.config.VerboseSelection or false
 Script.Storage.config.SilentExecution = Script.Storage.config.SilentExecution or false
 Script.Storage.config.AllowRawChatInput = Script.Storage.config.AllowRawChatInput or false
-Script.Debug.DumpStorage()
+--Script.Debug.DumpStorage()
 
 local function Help()
 	local cmd = Script.CallSelfCommand
