@@ -243,7 +243,9 @@ local function EchoItem(args)
 		return
 	end
 	if #list == 0 then
-		Game.PrintError(string.format("No entries in list [%s]", target))
+		if not Script.Storage.config.SuppressWarnings then
+			Game.PrintError(string.format("No entries in list [%s]", target))
+		end
 		return
 	end
 	local item, index = pick(list)
@@ -265,7 +267,9 @@ local function ExecuteItem(args)
 		return
 	end
 	if #list == 0 then
-		Game.PrintError(string.format("No entries in list [%s]", target))
+		if not Script.Storage.config.SuppressWarnings then
+			Game.PrintError(string.format("No entries in list [%s]", target))
+		end
 		return
 	end
 	local item, index = pick(list)
@@ -292,7 +296,9 @@ local function EvaluateItem(args)
 		return
 	end
 	if #list == 0 then
-		Game.PrintError(string.format("No entries in list [%s]", target))
+		if not Script.Storage.config.SuppressWarnings then
+			Game.PrintError(string.format("No entries in list [%s]", target))
+		end
 		return
 	end
 	local item, index = pick(list)
