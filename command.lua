@@ -14,7 +14,7 @@ cmdRename = { "move", "rename", "mv" }
 cmdPick = { "echo", "pick", "get" }
 cmdExecute = { "execute", "exec", "call", "run", "do" }
 cmdEvaluate = { "evaluate", "eval" }
-cmdConfig = { "config", "setting" }
+cmdConfig = { "config", "configure", "setting" }
 
 valueTrue = { "true", "on", "yes", "enable", "enabled" }
 valueFalse = { "false", "off", "no", "disable", "disabled" }
