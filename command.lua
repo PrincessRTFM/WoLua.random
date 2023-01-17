@@ -123,7 +123,7 @@ local function DisplayContents(args)
 		Game.PrintMessage(string.format("List [%s] is empty", target))
 		return
 	end
-	local msg = string.format("List %s: %d entr%s", target, #list, #list == 1 and "y" or "ies")
+	local msg = string.format("List [%s] has %d entr%s:", target, #list, #list == 1 and "y" or "ies")
 	local width = string.len(#list)
 	for i,v in ipairs(list) do
 		msg = msg .. string.format("\n%0" .. width .. "d: %s", i, v)
