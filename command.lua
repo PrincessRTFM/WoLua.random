@@ -119,7 +119,7 @@ local function DisplayContents(args)
 		return
 	end
 	if #list == 0 then
-		Game.PrintError(string.format("List [%s] is empty", target))
+		Game.PrintMessage(string.format("List [%s] is empty", target))
 		return
 	end
 	local msg = string.format("List %s: %d entr%s", target, #list, #list == 1 and "y" or "ies")
