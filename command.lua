@@ -6,7 +6,7 @@ local shiftWord = require 'shiftWord'
 
 cmdHelp = { "help", "?", "" }
 cmdList = { "list", "show", "ls" }
-cmdAdd = { "add" }
+cmdAdd = { "add", "new" }
 cmdRemove = { "del", "delete", "rm", "remove" }
 cmdClear = { "clear" }
 cmdDelete = { "delete-list", "deletelist" }
