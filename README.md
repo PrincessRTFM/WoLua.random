@@ -110,6 +110,22 @@ If these two checks both pass, the resulting text line is sent to the game. For 
 
 This makes an easy way to create a game macro that selects a random mount or minion from a particular list for use, which would allow you to effectively whitelist more than can be favourited in the game, or to have separate lists for different situations, without needing to make every item in the list the full command as the [execute] action would.
 
+### Export list
+- _Aliases: `export`_
+- _Arguments: list name_
+- _Example: `/wolua call random export greetings`_
+
+This command allows you to export a list as a JSON string for sharing with others using this script. The resulting JSON will automatically be copied to your system clipboard, and a status message will be printed to your chatlog (unless [suppressed][status messages]) with the number of items and the list name. You can then send this to someone else for use with the [import list] command.
+
+### Import list
+- _Aliases: `import`_
+- _Arguments: target list name_
+- _Example: `/wolua call random import greetings`_
+
+This command is the counterpart to the [export list] command, and is the functional inverse. Your system clipboard will be read and parsed as JSON, and if it contains a valid list (ie, an array, not an object) then the result will be imported as a new list with the given name. The named list must _not_ exist, to prevent accidentally clobbering something. If you want to replace a list, first use the [delete list] command on it. On success, a status message will be printed to your chatlog (unless [suppressed][status messages]) with the number of items imported and the name of the new list.
+
+Please note that you _can_ import an empty list, provided your clipboard contents are in fact an empty JSON array (`[]`) _or_ object (`{}`). Technically speaking, an object whose keys _imitate_ an array (all sequential positive integers) is also accepted and will be imported succesfully.
+
 ### Configuration
 - _Aliases: `config`, `configure`, `setting`_
 - _Arguments: setting name, new value (may be optional)_
@@ -183,6 +199,8 @@ For example, if you had a list of `/tp` commands for use with the Teleporter plu
 [echo]: <#echo-item>
 [execute]: <#execute-item>
 [evaluate]: <#evaluate-item>
+[export list]: <#export-list>
+[import list]: <#import-list>
 [configuration]: <#configuration>
 [warnings]: <#suppresswarnings>
 [status messages]: <#suppressstatusmessages>

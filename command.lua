@@ -16,6 +16,9 @@ cmdPick = { "echo", "pick", "get" }
 cmdExecute = { "execute", "exec", "call", "run", "do" }
 cmdEvaluate = { "evaluate", "eval" }
 cmdConfig = { "config", "configure", "setting" }
+cmdExport = { "export" }
+cmdImport = { "import" }
+cmdInspect = { "debug", "inspect" }
 
 valueTrue = { "true", "on", "yes", "enable", "enabled" }
 valueFalse = { "false", "off", "no", "disable", "disabled" }
@@ -29,7 +32,23 @@ Script.Storage.config.VerboseSelection = Script.Storage.config.VerboseSelection 
 Script.Storage.config.SilentExecution = Script.Storage.config.SilentExecution or false
 Script.Storage.config.AllowRawChatInput = Script.Storage.config.AllowRawChatInput or false
 --Script.Debug.DumpStorage()
+Script.SaveStorage()
 
+local function CleanStorage()
+	local lists = Script.Storage.lists;
+	local cleaned = false
+	for k,v in pairs(lists) do
+		if type(v) ~= "table" then
+			print(string.format("Deleting broken list %s (%s)", k, type(v)))
+			lists[k] = nil
+			cleaned = true
+		end
+	end
+	if cleaned then
+		print("Saving cleaned storage")
+		Script.SaveStorage()
+	end
+end
 local function Help()
 	local cmd = Script.CallSelfCommand
 	Game.PrintMessage(
@@ -132,7 +151,7 @@ local function DisplayContents(args)
 end
 local function AddItem(args)
 	local target, content = shiftWord(args)
-	if not target then
+	if #target < 1 then
 		Game.PrintError("No list name specified")
 		return
 	end
@@ -146,7 +165,7 @@ end
 local function RemoveItem(args)
 	-- We have to use an index here because we can't guarantee that remove-by-element will get the right one
 	local target, idx = shiftWord(args)
-	if not target then
+	if #target < 1 then
 		Game.PrintError("No list name specified")
 		return
 	end
@@ -171,7 +190,7 @@ local function RemoveItem(args)
 end
 local function ClearList(args)
 	local target = shiftWord(args)
-	if not target then
+	if #target < 1 then
 		Game.PrintError("No list name specified")
 		return
 	end
@@ -182,7 +201,7 @@ local function ClearList(args)
 end
 local function DeleteList(args)
 	local target = shiftWord(args)
-	if not target then
+	if #target < 1 then
 		Game.PrintError("No list name specified")
 		return
 	end
@@ -233,7 +252,7 @@ local function RenameList(args)
 end
 local function EchoItem(args)
 	local target = shiftWord(args)
-	if not target then
+	if #target < 1 then
 		Game.PrintError("No list name specified")
 		return
 	end
@@ -257,7 +276,7 @@ local function EchoItem(args)
 end
 local function ExecuteItem(args)
 	local target = shiftWord(args)
-	if not target then
+	if #target < 1 then
 		Game.PrintError("No list name specified")
 		return
 	end
@@ -286,7 +305,7 @@ local function ExecuteItem(args)
 end
 local function EvaluateItem(args)
 	local target, chatline = shiftWord(args)
-	if not target then
+	if #target < 1 then
 		Game.PrintError("No list name specified")
 		return
 	end
@@ -321,7 +340,7 @@ local function EvaluateItem(args)
 end
 local function Configure(args)
 	local target, value = shiftWord(args)
-	if not target then
+	if #target < 1 then
 		Game.PrintError("No configuration setting specified")
 		return
 	end
@@ -347,8 +366,79 @@ local function Configure(args)
 		Game.PrintMessage(string.format("%s is now %s", target, tostring(cfg[target])))
 	end
 end
+local function ExportList(args)
+	local target = shiftWord(args)
+	if #target < 1 then
+		Game.PrintError("No list name specified")
+		return
+	end
+	local list = Script.Storage.lists[target]
+	if type(list) ~= "table" then
+		Game.PrintError(string.format("No such list [%s]", target))
+		return
+	end
+	if #list == 0 then
+		Game.PrintError(string.format("List [%s] is empty", target))
+		return
+	end
+	local str = Script.SerialiseJson(list)
+	if str == nil then
+		Game.PrintError(string.format("Failed to serialise list [%s] to JSON", target))
+		return
+	end
+	Script.Clipboard = str
+	if not Script.Storage.config.SuppressStatusMessages then
+		Game.PrintMessage(string.format("Serialised %d entr%s from list [%s] to clipboard", #list, #list == 1 and "y" or "ies", target))
+	end
+end
+local function ImportList(args)
+	local target = shiftWord(args)
+	if #target < 1 then
+		Game.PrintError("No list name specified")
+		return
+	end
+	if type(Script.Storage.lists[target]) == "table" then
+		Game.PrintError(string.format("Cannot overwrite existing list [%s]", target))
+		return
+	end
+	local parsed = Script.ParseJson(Script.Clipboard)
+	if parsed == nil then
+		Game.PrintError("Clipboard does not appear to contain a valid lua table")
+		return
+	end
+	local list = {}
+	local idx = 0
+	for _ in pairs(parsed) do
+		idx = idx + 1
+		if parsed[idx] == nil then
+			Game.PrintError("Clipboard JSON seems to be an object, not an array")
+			return
+		end
+		list[idx] = tostring(parsed[idx])
+	end
+	Script.Storage.lists[target] = list
+	if Script.SaveStorage() and not Script.Storage.config.SuppressStatusMessages then
+		Game.PrintMessage(string.format("Deserialised %d entr%s from clipboard into new list [%s]", idx, idx == 1 and "y" or "ies", target))
+	end
+end
+
+local function Inspect(args)
+	local target = shiftWord(args)
+	if #target < 1 then
+		Game.PrintError("Nothing to debug inspect")
+		return
+	end
+	local thing = Script.Storage.lists[target]
+	Game.PrintMessage(string.format("Storage.lists.%s: %s", target, type(thing)))
+	if type(thing) == "table" then
+		Game.PrintMessage(Script.SerialiseJson(thing))
+	else
+		Game.PrintMessage(tostring(thing))
+	end
+end
 
 local function core(textline)
+	CleanStorage()
 	local action, args = shiftWord(textline, string.lower)
 	if contains(cmdHelp, action) then
 		Help()
@@ -378,6 +468,12 @@ local function core(textline)
 		EvaluateItem(args)
 	elseif contains(cmdConfig, action) then
 		Configure(args)
+	elseif contains(cmdExport, action) then
+		ExportList(args)
+	elseif contains(cmdImport, action) then
+		ImportList(args)
+	elseif contains(cmdInspect, action) then
+		Inspect(args)
 	else
 		Game.PrintMessage(string.format("Unknown command [%s]", action))
 		Game.PrintMessage(string.format("Use [%s %s %s] for command help", Script.PluginCommand, Script.Name, cmdHelp[1]))
