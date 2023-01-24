@@ -4,6 +4,7 @@ local pick = require 'pick'
 local contains = require 'contains'
 local shiftWord = require 'shiftWord'
 
+-- all of the script commands can have aliases, but the FIRST one is the one listed in the help command's output
 cmdHelp = { "help", "?", "" }
 cmdList = { "list", "show", "ls" }
 cmdAdd = { "add", "new" }
@@ -20,10 +21,13 @@ cmdExport = { "export" }
 cmdImport = { "import" }
 cmdInspect = { "debug", "inspect" }
 
+-- these are used by the configuration command for boolean settings
 valueTrue = { "true", "on", "yes", "enable", "enabled" }
 valueFalse = { "false", "off", "no", "disable", "disabled" }
 valueToggle = { "toggle", "flip", "invert", "" }
 
+-- all changes are live to the persistent storage table, and every change also saves the storage to disk
+-- it COULD be done with a cache, but then users would need to remember to run a save command, and I don't trust them
 Script.Storage.lists = type(Script.Storage.lists) == "table" and Script.Storage.lists or {}
 Script.Storage.config = type(Script.Storage.config) == "table" and Script.Storage.config or {}
 Script.Storage.config.SuppressWarnings = Script.Storage.config.SuppressWarnings or false
@@ -34,6 +38,9 @@ Script.Storage.config.AllowRawChatInput = Script.Storage.config.AllowRawChatInpu
 --Script.Debug.DumpStorage()
 Script.SaveStorage()
 
+-- this is called before the plugin even tries to handle the command provided, in order to remove any invalid entries
+-- if we manage to get something invalid in the list table, then half the actual commands would break on it, so rather
+-- than duplicating code to skip such issues, we just strip any problems out from the start
 local function CleanStorage()
 	local lists = Script.Storage.lists;
 	local cleaned = false
@@ -422,6 +429,7 @@ local function ImportList(args)
 	end
 end
 
+-- this is an unlisted debugging command, which doesn't require the script to be in debug mode but DOES require you to know it exists
 local function Inspect(args)
 	local target = shiftWord(args)
 	if #target < 1 then
@@ -437,6 +445,7 @@ local function Inspect(args)
 	end
 end
 
+-- this is basically just a function to dispatch the ACTUAL handler function
 local function core(textline)
 	CleanStorage()
 	local action, args = shiftWord(textline, string.lower)
