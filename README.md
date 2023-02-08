@@ -4,6 +4,8 @@ This is a [WoLua] command script for FFXIV. You will need to install the WoLua p
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/PrincessRTFM/WoLua.random/master?label=updated)
 [![GitHub issues](https://img.shields.io/github/issues-raw/PrincessRTFM/WoLua.random?label=known%20issues)](https://github.com/PrincessRTFM/WoLua.random/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc)
 
+[![Support me!](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/V7V7IK9UU)
+
 ## Usage
 For all script commands, remember that they must be passed to `/wolua call <script> <command>`. If you have installed this script as `random` within WoLua's script folder, you will need to run `/wolua call random <command>`. Other installation names will need to adjust accordingly. You can use any of the commands listed in the "aliases" under a given section.
 
