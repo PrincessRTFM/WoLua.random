@@ -184,7 +184,10 @@ local function RemoveItem(args)
 	if idx == "" then
 		idx = #list
 	end
-	idx = math.floor(tonumber(idx))
+	idx = tonumber(idx)
+	if type(idx) == "number" then
+		idx = math.floor(idx)
+	end
 	if type(idx) ~= "number" or idx < 1 or idx > #list then
 		Game.PrintError(string.format("Invalid index [%s] - must be a number between [1] and [%d] (inclusive)", tostring(idx), #list))
 		return
