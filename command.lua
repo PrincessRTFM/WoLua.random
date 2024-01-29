@@ -1,8 +1,8 @@
 --Script.Debug.Enabled = true
 
-local pick = require 'pick'
-local contains = require 'contains'
-local shiftWord = require 'shiftWord'
+local pick = require "pick"
+local contains = require "contains"
+local shiftWord = require "shiftWord"
 
 -- all of the script commands can have aliases, but the FIRST one is the one listed in the help command's output
 cmdHelp = { "help", "?", "" }
@@ -44,7 +44,7 @@ Script.SaveStorage()
 local function CleanStorage()
 	local lists = Script.Storage.lists;
 	local cleaned = false
-	for k,v in pairs(lists) do
+	for k, v in pairs(lists) do
 		if type(v) ~= "table" then
 			print(string.format("Deleting broken list %s (%s)", k, type(v)))
 			lists[k] = nil
@@ -126,7 +126,7 @@ end
 local function ListNames()
 	local found = 0
 	local msg = ""
-	for name,list in pairs(Script.Storage.lists) do
+	for name, list in pairs(Script.Storage.lists) do
 		found = found + 1
 		msg = msg .. string.format(", %s (%d entr%s)", name, #list, #list == 1 and "y" or "ies")
 	end
@@ -151,7 +151,7 @@ local function DisplayContents(args)
 	end
 	local msg = string.format("List [%s] has %d entr%s:", target, #list, #list == 1 and "y" or "ies")
 	local width = string.len(#list)
-	for i,v in ipairs(list) do
+	for i, v in ipairs(list) do
 		msg = msg .. string.format("\n%0" .. width .. "d: %s", i, v)
 	end
 	Game.PrintMessage(msg)
@@ -231,7 +231,7 @@ local function CopyList(args)
 	end
 	local origin = Script.Storage.lists[source]
 	local clone = {}
-	for i,v in ipairs(origin) do
+	for i, v in ipairs(origin) do
 		clone[i] = v
 	end
 	Script.Storage.lists[dest] = clone

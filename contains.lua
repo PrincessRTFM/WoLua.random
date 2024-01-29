@@ -1,5 +1,5 @@
-local function contains(table, element)
-	for _, value in pairs(table) do
+local function contains(list, element)
+	for _, value in pairs(list) do
 		if value == element then
 			return true
 		end
