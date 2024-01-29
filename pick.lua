@@ -1,3 +1,7 @@
+---Picks a random item from a table
+---@param values table The list of items to pick from
+---@return any item The chosen item
+---@return integer index The chosen item's index
 local function pick(values)
 	if type(values) ~= "table" then return values, 0 end
 	if #values == 0 then return nil, 0 end

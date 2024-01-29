@@ -171,7 +171,11 @@ local function AddItem(args)
 end
 local function RemoveItem(args)
 	-- We have to use an index here because we can't guarantee that remove-by-element will get the right one
-	local target, idx = shiftWord(args)
+	---@type string
+	local target
+	---@type string|number?
+	local idx
+	target, idx = shiftWord(args)
 	if #target < 1 then
 		Game.PrintError("No list name specified")
 		return
