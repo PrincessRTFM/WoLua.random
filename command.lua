@@ -5,26 +5,27 @@ local contains = require "contains"
 local shiftWord = require "shiftWord"
 
 -- all of the script commands can have aliases, but the FIRST one is the one listed in the help command's output
-cmdHelp = { "help", "?", "" }
-cmdList = { "list", "show", "ls" }
-cmdAdd = { "add", "new" }
-cmdRemove = { "del", "delete", "rm", "remove" }
-cmdClear = { "clear", "empty" }
-cmdDelete = { "delete-list", "deletelist" }
-cmdCopy = { "copy", "clone", "cp" }
-cmdRename = { "move", "rename", "mv" }
-cmdPick = { "echo", "pick", "get" }
-cmdExecute = { "execute", "exec", "call", "run", "do" }
-cmdEvaluate = { "evaluate", "eval" }
-cmdConfig = { "config", "configure", "setting" }
-cmdExport = { "export" }
-cmdImport = { "import" }
-cmdInspect = { "debug", "inspect" }
+
+CmdHelp = { "help", "?", "" }
+CmdList = { "list", "show", "ls" }
+CmdAdd = { "add", "new" }
+CmdRemove = { "del", "delete", "rm", "remove" }
+CmdClear = { "clear", "empty" }
+CmdCopy = { "copy", "clone", "cp" }
+CmdRename = { "move", "rename", "mv" }
+CmdDelete = { "delete-list", "deletelist" }
+CmdPick = { "echo", "pick", "get" }
+CmdExecute = { "execute", "exec", "call", "run", "do" }
+CmdEvaluate = { "evaluate", "eval" }
+CmdConfig = { "config", "configure", "setting" }
+CmdExport = { "export" }
+CmdImport = { "import" }
+CmdInspect = { "debug", "inspect" }
 
 -- these are used by the configuration command for boolean settings
-valueTrue = { "true", "on", "yes", "enable", "enabled" }
-valueFalse = { "false", "off", "no", "disable", "disabled" }
-valueToggle = { "toggle", "flip", "invert", "" }
+ValueTrue = { "true", "on", "yes", "enable", "enabled" }
+ValueFalse = { "false", "off", "no", "disable", "disabled" }
+ValueToggle = { "toggle", "flip", "invert", "" }
 
 -- all changes are live to the persistent storage table, and every change also saves the storage to disk
 -- it COULD be done with a cache, but then users would need to remember to run a save command, and I don't trust them
@@ -62,63 +63,99 @@ local function Help()
 		string.format(
 			"%s %s - display all lists",
 			cmd,
-			cmdList[1]
+			CmdList[1]
 		)
 	)
 	Game.PrintMessage(
 		string.format(
 			"%s %s <listName> - display contents of named list",
 			cmd,
-			cmdList[1]
+			CmdList[1]
 		)
 	)
 	Game.PrintMessage(
 		string.format(
 			"%s %s <listName> <contents to add...> - add the given contents as a new item on the named list",
 			cmd,
-			cmdAdd[1]
+			CmdAdd[1]
 		)
 	)
 	Game.PrintMessage(
 		string.format(
 			"%s %s <listName> [<index>] - remove the item at the given index from the named list; if no index is given, the LAST item is removed",
 			cmd,
-			cmdRemove[1]
+			CmdRemove[1]
 		)
 	)
 	Game.PrintMessage(
 		string.format(
 			"%s %s <listName> - remove all items in the named list",
 			cmd,
-			cmdClear[1]
+			CmdClear[1]
+		)
+	)
+	Game.PrintMessage(
+		string.format(
+			"%s %s <listName> <newName> - clone the named list under a new name",
+			cmd,
+			CmdCopy[1]
+		)
+	)
+	Game.PrintMessage(
+		string.format(
+			"%s %s <listName> <newName> - move the named list to a new name",
+			cmd,
+			CmdRename[1]
 		)
 	)
 	Game.PrintMessage(
 		string.format(
 			"%s %s <listName> - delete the named list",
 			cmd,
-			cmdDelete[1]
+			CmdDelete[1]
 		)
 	)
 	Game.PrintMessage(
 		string.format(
 			"%s %s <listName> - pick a random item from the named list and echo it",
 			cmd,
-			cmdPick[1]
+			CmdPick[1]
 		)
 	)
 	Game.PrintMessage(
 		string.format(
 			"%s %s <listName> - pick a random item from the named list and run it as a chat command",
 			cmd,
-			cmdExecute[1]
+			CmdExecute[1]
 		)
 	)
 	Game.PrintMessage(
 		string.format(
 			"%s %s <listName> <input line...> - pick a random item from the named list and run the given input line, replacing all instances of \"$$$\" with the chosen item",
 			cmd,
-			cmdEvaluate[1]
+			CmdEvaluate[1]
+		)
+	)
+	--[[ TODO: document script config settings
+	Game.PrintMessage(
+		string.format(
+			"%s %s <setting> <value...> - change one of the script's config settings",
+			cmd,
+			CmdConfig[1]
+		)
+	)]]
+	Game.PrintMessage(
+		string.format(
+			"%s %s <listName> - serialise the named list to a JSON array and put it into the system clipboard",
+			cmd,
+			CmdExport[1]
+		)
+	)
+	Game.PrintMessage(
+		string.format(
+			"%s %s <listName> - try to parse the system clipboard's contents as a JSON array; if successful, save them as the named list",
+			cmd,
+			CmdImport[1]
 		)
 	)
 	Game.PrintMessage("List names are case-sensitive, commands are not.")
@@ -361,11 +398,11 @@ local function Configure(args)
 	local cfg = Script.Storage.config
 	local typ = type(cfg[target])
 	if typ == "boolean" then
-		if contains(valueTrue, value) then
+		if contains(ValueTrue, value) then
 			cfg[target] = true
-		elseif contains(valueFalse, value) then
+		elseif contains(ValueFalse, value) then
 			cfg[target] = false
-		elseif contains(valueToggle, value) then
+		elseif contains(ValueToggle, value) then
 			cfg[target] = not cfg[target]
 		else
 			Game.PrintError(string.format("Unknown boolean state [%s]", value))
@@ -456,43 +493,43 @@ end
 local function core(textline)
 	CleanStorage()
 	local action, args = shiftWord(textline, string.lower)
-	if contains(cmdHelp, action) then
+	if contains(CmdHelp, action) then
 		Help()
-	elseif contains(cmdList, action) then
+	elseif contains(CmdList, action) then
 		if #args > 0 then -- displaying the contents of a named list (with indexes)
 			DisplayContents(args)
 		else -- displaying all known list names (with the number of entries)
 			ListNames()
 		end
-	elseif contains(cmdAdd, action) then
+	elseif contains(CmdAdd, action) then
 		AddItem(args)
-	elseif contains(cmdRemove, action) then
+	elseif contains(CmdRemove, action) then
 		RemoveItem(args)
-	elseif contains(cmdClear, action) then
+	elseif contains(CmdClear, action) then
 		ClearList(args)
-	elseif contains(cmdDelete, action) then
+	elseif contains(CmdDelete, action) then
 		DeleteList(args)
-	elseif contains(cmdCopy, action) then
+	elseif contains(CmdCopy, action) then
 		CopyList(args)
-	elseif contains(cmdRename, action) then
+	elseif contains(CmdRename, action) then
 		RenameList(args)
-	elseif contains(cmdPick, action) then
+	elseif contains(CmdPick, action) then
 		EchoItem(args)
-	elseif contains(cmdExecute, action) then
+	elseif contains(CmdExecute, action) then
 		ExecuteItem(args)
-	elseif contains(cmdEvaluate, action) then
+	elseif contains(CmdEvaluate, action) then
 		EvaluateItem(args)
-	elseif contains(cmdConfig, action) then
+	elseif contains(CmdConfig, action) then
 		Configure(args)
-	elseif contains(cmdExport, action) then
+	elseif contains(CmdExport, action) then
 		ExportList(args)
-	elseif contains(cmdImport, action) then
+	elseif contains(CmdImport, action) then
 		ImportList(args)
-	elseif contains(cmdInspect, action) then
+	elseif contains(CmdInspect, action) then
 		Inspect(args)
 	else
 		Game.PrintMessage(string.format("Unknown command [%s]", action))
-		Game.PrintMessage(string.format("Use [%s %s %s] for command help", Script.PluginCommand, Script.Name, cmdHelp[1]))
+		Game.PrintMessage(string.format("Use [%s %s %s] for command help", Script.PluginCommand, Script.Name, CmdHelp[1]))
 	end
 end
 
